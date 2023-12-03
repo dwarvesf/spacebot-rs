@@ -73,8 +73,13 @@ impl Handler for Player {
 }
 
 fn main() {
+    env::set_var("API_KEY", "webuild");
+    env::set_var("TEAM_NAME", "antono");
+    env::set_var("SERVER_HOST", "127.0.0.1:8080");
+    env::set_var("ROOM_ID", "1");
     println!("starting up...");
     let api_key = &env::var("API_KEY").unwrap_or("a".into());
     let team_name = &env::var("TEAM_NAME").unwrap_or("a".into());
-    tokyo::run(api_key, team_name, Player::default()).unwrap();
+    let room_id = &env::var("ROOM_ID").unwrap_or("0".into());
+    tokyo::run(api_key, room_id, team_name, Player::default()).unwrap();
 }

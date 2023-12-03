@@ -54,7 +54,8 @@ impl Handler for Player {
 fn main() {
     let api_key = &env::var("API_KEY").unwrap_or("a".into());
     let team_name = &env::var("TEAM_NAME").unwrap_or("a".into());
+    let room_id = &env::var("ROOM_ID").unwrap_or("0".into());
 
     println!("starting up...");
-    tokyo::run(api_key, team_name, Player::default()).unwrap();
+    tokyo::run(api_key, room_id, team_name, Player::default()).unwrap();
 }

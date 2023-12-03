@@ -12,12 +12,12 @@ mod game;
 mod models;
 
 use crate::actors::GameActor;
-use actix::{Actor, Addr, System};
+use actix::{Addr, System};
 use actix_web::{http::Method, middleware::Logger, server, App};
 use lazy_static::lazy_static;
 use listenfd::ListenFd;
 use tokyo::models::GameConfig;
-use std::collections::HashSet;
+use std::{collections::{HashSet, HashMap}, sync::{Mutex, Arc}};
 
 #[derive(Deserialize, Debug)]
 pub struct AppConfig {
@@ -28,7 +28,8 @@ pub struct AppConfig {
 }
 
 pub struct AppState {
-    game_addr: Addr<GameActor>,
+    game_addresses: Arc<Mutex<HashMap<i32, Addr<GameActor>>>>,
+    // db_conn: Client,
 }
 
 const CONFIG_FILE_PATH: &str = "tokyo.toml";
@@ -51,21 +52,24 @@ fn main() -> Result<(), String> {
 
     let actor_system = System::new("meetup-server");
 
-    let game_actor = GameActor::new(APP_CONFIG.game_config);
-    let game_actor_addr = game_actor.start();
+    let game_addrs = Arc::new(Mutex::new(HashMap::new()));
 
     let mut server = server::new(move || {
-        let app_state = AppState { game_addr: game_actor_addr.clone() };
+        let app_state = AppState { game_addresses: game_addrs.clone() };
 
         App::with_state(app_state)
             .middleware(Logger::default())
-            .resource("/socket", |r| {
+            .resource("/socket/{room_id}", |r| {
                 r.method(Method::GET).with(controllers::api::socket_handler);
             })
-            .resource("/spectate", |r| {
+            .resource("/rooms", |r| {
+                r.get().with(controllers::api::list_rooms);
+                r.post().with(controllers::api::create_room);
+            })
+            .resource("/spectate/{room_id}", |r| {
                 r.method(Method::GET).with(controllers::api::spectate_handler);
             })
-            .resource("/reset", |r| {
+            .resource("/reset/{room_id}", |r| {
                 r.method(Method::GET).with(controllers::api::reset_handler);
             })
             .handler(

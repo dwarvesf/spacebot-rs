@@ -15,7 +15,8 @@ function connect(handler) {
   websocket_status.style.borderColor = "gray";
   const isLocalServer = window.location.host.indexOf('localhost') !== -1;
   const protocol = isLocalServer ? 'ws://' : 'wss://';
-  const socket = new WebSocket(`${protocol}${window.location.host}/spectate`);
+  const roomId = window.location.search.split("=")[1];
+  const socket = new WebSocket(`${protocol}${window.location.host}/spectate/${roomId ? roomId : '0'}`);
   socket.addEventListener('open', function (event) {
     websocket_status.innerText = "connected";
     websocket_status.style.borderColor = "white";

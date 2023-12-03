@@ -102,7 +102,8 @@ fn main() {
     // TODO: Substitute with your API key and team name.
     let api_key = &env::var("API_KEY").unwrap_or("a".into());
     let team_name = &env::var("TEAM_NAME").unwrap_or("ThucUnbelievale".into());
+    let room_id = &env::var("ROOM_ID").unwrap_or("0".into());
 
     println!("starting up...");
-    tokyo::run(api_key, team_name, Player::new()).unwrap();
+    tokyo::run(api_key, room_id, team_name, Player::new()).unwrap();
 }
